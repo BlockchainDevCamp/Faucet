@@ -1,17 +1,14 @@
-'use strict';
-
+"use strict"
 const controllers = require('../controllers');
 
 module.exports = app => {
-    app.post('/:address/transactions', [
-        controllers.transactionResource.validateTransactionData,
-        controllers.transactionResource.createTransaction
-    ]);
+    app.get('/', controllers.faucetController.main);
+    app.get('/success', controllers.faucetController.success);
+    app.post('/faucet', controllers.faucetController.postTransaction);
 
     app.all('*', (req, res) => {
-
         res.status(404);
-    res.send('404 Not Found');
-    res.end();
-});
+        res.send('404 Not Found');
+        res.end();
+    });
 };

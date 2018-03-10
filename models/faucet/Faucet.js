@@ -3,9 +3,6 @@
 const Crypto = require('../Crypto');
 
 class Faucet {
-
-    //TODO Create constructor/builder/factory method which generates public AND private key on behalf of the user
-
     constructor(privateKeyStr, publicKey, compressedPublicKey, address) {
         this.privateKey = privateKeyStr;
         this.publicKey = publicKey;
@@ -27,7 +24,7 @@ class Faucet {
 
     static createFaucet() {
         let privateKey = Crypto.createPrivateKey();
-        return Wallet.loadFaucet(privateKey);
+        return Faucet.loadFaucet(privateKey);
     }
 }
 

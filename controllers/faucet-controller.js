@@ -1,39 +1,69 @@
 'use strict';
 
-const Faucet = require('../models/faucet/Faucet');
+const crypto = require('../models/Crypto')
+const request = require('request')
 
-function handleWalletCreation(request, response, wallet) {
-    let walletInfo = new WalletInfo(wallet.privateKey, wallet.compressedPublicKey, wallet.address);
-    let status = 200;
+module.exports = { 
+    main: (req, res) => {
+        res.render('home/main');
+    },
 
-    if (!WalletRepository.walletByAddress(wallet.address)) {
-        WalletRepository.addWallet(wallet);
-        status = 201;
-    }
-
-    response.status(status);
-    response.set('Content-Type', 'application/json');
-    response.send(walletInfo);
-}
-
-module.exports = {
-    retrieveWalletByAddress(request, response) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new Error("Not Found.");
+    success: (req, res) => {
+        res.render('home/success');
+    },
+    postTransaction: (req, res) => {
+        if(req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null)
+        {
+            return res.json({"responseError" : "Please select captcha first"});
         }
-        response.set('Content-Type', 'application/json');
-        response.send(request.wallet);
-    },
+        const secretKey = "6LeA30sUAAAAAPxBqNwnxOUOYdjUMyv7Dtgsi9xl";
+        
+        const verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
+        
+        request(verificationURL,function(error,response,body) {
+            body = JSON.parse(body);
+        
+            if(body.success !== undefined && !body.success) {
+            return res.json({"responseError" : "Failed captcha verification"});
+            }
+            res.json({"responseSuccess" : "Sucess"});
+        });
 
-    createWallet(request, response) {
-        let wallet = Wallet.createWallet();
-        handleWalletCreation(request, response, wallet);
-    },
+        let privateKey = 'migema0gcsqgsib3dqebaquaa4gmadcbiakbghjhmtedxpux8tgejsexljffde8d';
+        let nodeUri = "http://localhost:5555";
+        let publicKey = "0x53d9468ae772B27f6b49c108D2d1677C122b2b52";
+        let compressedPublicKey = crypto.compressPublicKey(publicKey);
+        let address = crypto.createAddress(compressedPublicKey);
+        let userAddress = req.path.split('/')[2];  
+        let amount = 1;
+        
+        let data = {
+            from: address,
+            to: userAddress,
+            amount: amount,
+            timeCreated: (new Date()).getTime(),
+        };
+        // create transaction hash
+        data.transactionHash = crypto.signSHA256(JSON.stringify(data));
+        // sign transaction hash
+        data.senderSignature = crypto.createTransactionSignature(privateKey, data.transactionHash);
+        // add public key
+        data.senderPubKey = publicKey;
 
-    loadWallet(request, response) {
-        let privateKey = request.body['privateKey'];
-        let wallet = Wallet.loadWallet(privateKey);
-        handleWalletCreation(request, response, wallet);
+        let uri = nodeUri + '/transactions';
+
+        let options = {
+            uri: uri,
+            method: 'POST',
+            json: data
+        };
+        
+        request(options, function (error, response, body) {   
+            if (!error) {
+                res.redirect('/success')
+            } else {
+                res.redirect('/')
+            }
+        });
     }
-};
-
+}
