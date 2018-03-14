@@ -1,5 +1,6 @@
 'use strict';
 
+const Faucet = require('../models/faucet/Faucet');
 const FaucetWallet = require('../models/faucet/FaucetWallet');
 const Transaction = require('../models/transaction/Transaction');
 const TransactionData = require('../models/transaction/TransactionData');
@@ -16,6 +17,15 @@ module.exports = {
     success: (req, res) => {
         res.render('home/success');
     },
+
+    tooSoon: (req, res) => {
+        res.render('home/too-soon');
+    },
+
+    outOfHoney: (req, res) => {
+        res.render('home/out-of-honey');
+    },
+
     postTransaction: async (req, res) => {
         // if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
         //     return res.json({"responseError": "Please select captcha first"});
@@ -56,6 +66,20 @@ module.exports = {
             url: "http://127.0.0.1:5555/transactions",
         };
 
+        try {
+            Faucet.withdrawACoin(recipientAddress);
+        }catch (err){
+            if ("A coin could be requested only once per hour." === err.message) {
+                res.status(429);
+                res.set('Content-Type', 'text/html');
+                res.redirect('/too-soon');
+            } else if ("Ups! We ran out of honey!" === err.message) {
+                res.status(500);
+                res.set('Content-Type', 'text/html');
+                res.redirect('/out-of-money');
+            }
+            return;
+        }
         await Request(options, function (err, response, transactionHashBody) {
             if (err) {
                 console.error(err);
