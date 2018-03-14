@@ -1,7 +1,6 @@
 const handlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
-var express = require('express');
-// var app = express();
+const express = require('express');
 
 module.exports = app => {
     app.engine('.hbs', handlebars({

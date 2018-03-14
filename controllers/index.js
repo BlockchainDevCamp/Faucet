@@ -1,7 +1,5 @@
-const faucetController = require('./faucet-controller');
-const transactionResource = require('./transaction/TransactionController');
+const faucetController = require('./FaucetController');
 
 module.exports = {
-    faucetController,
-    transactionResource
+    faucetController
 };
