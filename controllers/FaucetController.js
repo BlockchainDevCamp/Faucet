@@ -17,25 +17,25 @@ module.exports = {
         res.render('home/success');
     },
     postTransaction: async (req, res) => {
-        if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
-            return res.json({"responseError": "Please select captcha first"});
-        }
+        // if (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
+        //     return res.json({"responseError": "Please select captcha first"});
+        // }
+        //
+        // const secretKey = "6LeA30sUAAAAAPxBqNwnxOUOYdjUMyv7Dtgsi9xl";
+        // const verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
+        //
+        // await Request(verificationURL, function (error, response, body) {
+        //     body = JSON.parse(body);
+        //
+        //     if (body.success !== undefined && !body.success) {
+        //         return res.json({"responseError": "Failed captcha verification"});
+        //     }
+        //     res.json({"responseSuccess": "Success"});
+        //
+        //     response.json({"responseCode": 0, "responseDesc": "Success"});
+        // });
 
-        const secretKey = "6LeA30sUAAAAAPxBqNwnxOUOYdjUMyv7Dtgsi9xl";
-        const verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
-
-        await Request(verificationURL, function (error, response, body) {
-            body = JSON.parse(body);
-
-            if (body.success !== undefined && !body.success) {
-                return res.json({"responseError": "Failed captcha verification"});
-            }
-            res.json({"responseSuccess": "Success"});
-
-            response.json({"responseCode": 0, "responseDesc": "Success"});
-        });
-
-        // handling transaction
+        // 2. Handling transaction
         let senderAddress = FaucetWallet.address;
         let recipientAddress = req.body['address'];
         // TODO validate toAddress
@@ -57,8 +57,6 @@ module.exports = {
         };
 
         await Request(options, function (err, response, transactionHashBody) {
-            console.log(transactionHash);
-            console.log(transactionHashBody);
             if (err) {
                 console.error(err);
                 res.set('Content-Type', 'text/html')
@@ -77,7 +75,7 @@ module.exports = {
             else {
                 res.set('Content-Type', 'text/html')
                 res.redirect(301, '/success');
-            // }
+            }
         });
     }
 };
