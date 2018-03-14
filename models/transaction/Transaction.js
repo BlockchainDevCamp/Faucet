@@ -1,7 +1,7 @@
 'use strict';
 
-const Crypto = require('../../models/Crypto');
-const TransactionData = require('./TransactionData');
+const Crypto = require('../Crypto');
+const Wallet = require('../faucet/FaucetWallet');
 
 class Transaction {
 
@@ -15,12 +15,10 @@ class Transaction {
         this.senderSignature = senderSignature;
     }
 
-    static createTransaction(request) {
-        let transactionData = TransactionData.createTransactionData(request);
-
+    static createTransaction(transactionData) {
         let transactionPayloadHash = Crypto.signSHA256(JSON.stringify(transactionData));
 
-        let senderSignature = Crypto.createTransactionSignature(request.wallet.privateKey, transactionPayloadHash);
+        let senderSignature = Crypto.createTransactionSignature(Wallet.privateKey, transactionPayloadHash);
 
         return new Transaction(
             transactionData.from,
@@ -31,7 +29,6 @@ class Transaction {
             transactionData.dateCreated,
             senderSignature);
     }
-
 }
 
 module.exports = Transaction;
