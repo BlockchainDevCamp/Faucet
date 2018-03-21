@@ -16,7 +16,7 @@ For each request, the faucet creates a transaction, signs it and sends it to a s
 
 ### Recaptcha Resolved
 
-![Recaptcha Resolved](ui-screenshots/faucet-ui-landing-page.png?raw=true "Recaptcha Resolved")
+![Recaptcha Resolved](ui-screenshots/faucet-ui-landing-page-recaptcha-resolved.png?raw=true "Recaptcha Resolved")
 
 ### Successful Transaction
 
